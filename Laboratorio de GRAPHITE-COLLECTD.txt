@@ -1,0 +1,218 @@
+INSTALACIÓN DE GRAPHITE
+=======================
+FUENTE: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-graphite-on-an-ubuntu-14-04-server
+
+Muy importante: Comenzar desde una instalación del SO nueva 
+
+apt -y update
+apt -y upgrade
+apt -y install pwgen
+apt -y install graphite-web graphite-carbon
+	### Responder "No"
+	### Tipear <<password mysql>>
+apt -y install mysql-server mysql-client libmysqlclient-dev
+mysql -u root -p <<password mysql>>
+	CREATE USER 'graphite'@'localhost' IDENTIFIED BY '<<password usuario graphite mysql>>';
+	GRANT ALL PRIVILEGES ON graphite.* TO 'graphite'@'localhost';
+	FLUSH PRIVILEGES;
+	CREATE DATABASE graphite;
+	exit
+pwgen -N 1 -s 96     
+vi /etc/graphite/local_settings.py
+	[...]
+	SECRET_KEY = 
+	[...]
+	TIME_ZONE = 'America/Caracas'
+	[...]
+	USE_REMOTE_USER_AUTHENTICATION = True
+	[...]
+	URL_PREFIX = '/graphite'
+	[...]
+	DATABASES = {
+		'default': {
+			'NAME': 'graphite',
+			'ENGINE': 'django.db.backends.mysql',
+			'USER': 'graphite',
+			'PASSWORD': '<<password usuario graphite mysql>>',
+			'HOST': '127.0.0.1',
+			'PORT': ''
+		}
+	}
+	[...]
+apt install python-pip
+pip install mysqlclient
+pip install pymysql
+graphite-manage syncdb
+### Si da error repetir el comando: graphite-manage syncdb
+	Responder: yes
+	User: graphite
+	email: <<su email>>
+	password: <<password usuario graphite mysql>>
+vi /etc/default/graphite-carbon
+	### Cambiar de "false" a "true"
+	CARBON_CACHE_ENABLED=true
+vi /etc/carbon/carbon.conf
+	### Cambiar de "false" a "true"
+	ENABLE_LOGROTATION = true
+vi /etc/carbon/storage-schemas.conf
+	[...]
+	[test]
+	pattern = ^test\.
+	retentions = 10s:10m,1m:1h,10m:1d
+	[...]
+cp /usr/share/doc/graphite-carbon/examples/storage-aggregation.conf.example /etc/carbon/storage-aggregation.conf
+service carbon-cache start
+apt -y install apache2 libapache2-mod-wsgi
+a2dissite 000-default
+cp /usr/share/graphite-web/apache2-graphite.conf /etc/apache2/sites-available
+a2ensite apache2-graphite
+service apache2 reload
+### Desde un Web Browser http://<<ip WAN de servidor>
+### Pulse en la opción "Login" en la parte superior
+### Ingrese con el usuario "root" y la clave <<password usuario graphite mysql>>
+### Chequear la explicación de uso en la sesión "Checking out the Web Interface" de https://www.digitalocean.com/community/tutorials/how-to-install-and-use-graphite-on-an-ubuntu-14-04-server
+
+
+INSTALACIÓN DE COLLECTD EN EL SERVIDOR GRAPHITE
+===============================================
+FUENTE: https://www.digitalocean.com/community/tutorials/how-to-configure-collectd-to-gather-system-metrics-for-graphite-on-ubuntu-14-04
+
+hostnamectl sethostname <<fqdn>>
+vi /etc/hosts
+	127.0.0.1       localhost
+	127.0.1.1       <<fqdn>>
+	[...]
+apt -y update
+apt -y upgrade
+apt -y install collectd collectd-utils
+vi /etc/collectd/collectd.conf
+	[...]
+	Hostname "<<fqdn>>"
+	[...]
+	### Comentar todos los módulos y dejar sólo los que se muestran a continuación para efectos del ejemplo:
+	LoadPlugin apache
+	LoadPlugin cpu
+	LoadPlugin df
+	LoadPlugin entropy
+	LoadPlugin interface
+	LoadPlugin load
+	LoadPlugin memory
+	LoadPlugin processes
+	LoadPlugin rrdtool
+	LoadPlugin users
+	LoadPlugin write_graphite
+	[...]
+	### Algunos módulos requieren configuración, otros no.
+	<Plugin apache>
+		<Instance "Graphite">
+			URL "http://<<ip del servidor>>/server-status?auto"
+			Server "apache"
+		</Instance>
+	</Plugin>
+	[...]
+	<Plugin df>
+        Device "/dev/<<dispositivo disk>>"
+        MountPoint "/"
+        FSType "ext4"
+	</Plugin>
+	[...]
+	<Plugin interface>
+        Interface "<<interfaz red 1>>"
+		[...]
+        Interface "<<interfaz red n>>"
+        IgnoreSelected false
+	</Plugin>
+	[...]
+	<Plugin write_graphite>
+        <Node "graphing">
+                Host "localhost"
+                Port "2003"
+                Protocol "tcp"
+                LogSendErrors true
+                Prefix "collectd"
+                StoreRates true
+                AlwaysAppendDS false
+                EscapeCharacter "_"
+        </Node>
+	</Plugin>
+	[...]
+vi /etc/apache2/sites-available/apache2-graphite.conf
+	[...]
+	### Despues de <Location "/content/">
+	<Location "/server-status">
+        SetHandler server-status
+        Require all granted
+    </Location>
+	[...]
+systemctl reload apache2
+systemctl stop collectd
+systemctl start collectd
+
+
+INSTALACIÓN DE COLLECTD EN UN SERVIDOR
+======================================
+FUENTE: https://www.digitalocean.com/community/tutorials/how-to-configure-collectd-to-gather-system-metrics-for-graphite-on-ubuntu-14-04
+
+apt -y update
+apt -y upgrade
+hostnamectl sethostname <<fqdn>>
+vi /etc/hosts
+	127.0.0.1       localhost
+	127.0.1.1       <<fqdn>>
+	[...]
+apt -y install collectd collectd-utils
+vi /etc/collectd/collectd.conf
+	[...]
+	Hostname "<<hostname>>"
+	[...]
+	### Comentar todos los módulos y dejar sólo estos para el ejemplo
+	LoadPlugin cpu
+	LoadPlugin df
+	LoadPlugin interface
+	LoadPlugin load
+	LoadPlugin memory
+	LoadPlugin processes
+	LoadPlugin users
+	LoadPlugin write_graphite
+	[...]
+	### Algunos módulos requieren configuración, otros no.
+	<Plugin df>
+		Device "/dev/<<dispositivo de disco>>"
+		MountPoint "/"
+		FSType "ext4"
+	</Plugin>
+	[...]
+	<Plugin interface>
+		Interface "<<interface red 1>>"
+		[...]
+		Interface "<<interface red n>>"
+		IgnoreSelected false
+	</Plugin>
+	[...]
+	<Plugin write_graphite>
+        <Node "graphing">
+                Host "<<ip servidor graphite>>"
+                Port "2003"
+                Protocol "tcp"
+                LogSendErrors true
+                Prefix "collectd-"
+                StoreRates true
+                AlwaysAppendDS false
+                EscapeCharacter "_"
+        </Node>
+	</Plugin>
+	[...]
+systemctl stop collectd
+systemctl start collectd
+
+
+CONFIGURAR SERVIDOR GRAPHITE PARA RECIBIR Y MANEJAR LA DATA
+############################################################
+FUENTE: https://www.digitalocean.com/community/tutorials/how-to-configure-collectd-to-gather-system-metrics-for-graphite-on-ubuntu-14-04
+
+vi /etc/carbon/storage-schemas.conf
+	[collectd]
+	pattern = ^collectd.*
+	retentions = 10s:1d,1m:7d,10m:1y
+systemctl stop carbon-cache
+systemctl start carbon-cache
