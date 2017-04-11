@@ -153,8 +153,6 @@ INSTALACIÓN DE COLLECTD EN UN SERVIDOR
 ======================================
 FUENTE: https://www.digitalocean.com/community/tutorials/how-to-configure-collectd-to-gather-system-metrics-for-graphite-on-ubuntu-14-04
 
-apt -y update
-apt -y upgrade
 hostnamectl sethostname <<fqdn>>
 vi /etc/hosts
 	127.0.0.1       localhost
