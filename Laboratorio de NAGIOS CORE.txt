@@ -11,6 +11,8 @@ https://itefix.net/content/nagwin-usage-example-3-basic-monitoring-linux-hosts
 
 Instalacion de NAGIOS CORE 4.3.1 en UBUNTU 16.04
 ================================================
+Muy importante: Comenzar desde una instalación del SO nueva 
+
 apt -y update
 apt -y upgrade
 apt -y install autoconf gcc libc6 build-essential bc gawk dc gettext libmcrypt-dev libssl-dev make unzip apache2 apache2-utils libgd2-xpm-dev
@@ -127,9 +129,9 @@ htpasswd /usr/local/nagios/etc/htpasswd.users <<user id>>
 systemctl restart apache2
 
 
-============================
-MONITOREAR UN SERVIDOR LINUX
-============================
+=====================================
+INSTALACION DE NRPE EN SERVIDOR LINUX
+=====================================
 FUENTE: https://assets.nagios.com/downloads/nagioscore/docs/nrpe/NRPE.pdf
 		https://itefix.net/content/nagwin-usage-example-3-basic-monitoring-linux-hosts
 		
@@ -163,7 +165,7 @@ vi /etc/xinetd.d/nrpe
 	[...]	
 	disable = no
 	[...]
-	only_from       = <<ip LAN del servidor nagios>>
+	only_from       = 127.0.0.1 <<ip LAN del servidor nagios>>
 	[...]
 vi /usr/local/nagios/etc/nrpe.cfg
 	[...]
@@ -174,7 +176,9 @@ vi /usr/local/nagios/etc/nrpe.cfg
 	###
 	command[check_users]=/usr/local/nagios/libexec/check_users -w 5 -c 10
 	command[check_load]=/usr/local/nagios/libexec/check_load -w 15,10,5 -c 30,25,20
+	### Alustar este:
 	command[check_disk]=/usr/local/nagios/libexec/check_disk -w 20% -c 10% -p /dev/sda1
+	###
 	command[check_zombie_procs]=/usr/local/nagios/libexec/check_procs -w 5 -c 10 -s Z
 	command[check_total_procs]=/usr/local/nagios/libexec/check_procs -w 150 -c 200
 	[...]
@@ -184,9 +188,9 @@ systemctl start nrpe
 netstat -at | egrep "nrpe|5666"
 
 
-=================================================
-CONFIGURACIÓN EN EL SERVIDOR NAGIOS DE NUEVO HOST
-=================================================
+======================================================
+INSTALACION Y CONFIGURACION DE NRPE EN SERVIDOR NAGIOS
+======================================================
 FUENTE: https://assets.nagios.com/downloads/nagioscore/docs/nrpe/NRPE.pdf
 		https://itefix.net/content/nagwin-usage-example-3-basic-monitoring-linux-hosts
 		
