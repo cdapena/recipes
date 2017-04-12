@@ -1,0 +1,62 @@
+INSTALACIÓN DE CLUSTER MYSQL CON CLUSTER CONTROL
+================================================
+FUENTE: https://severalnines.com/download-clustercontrol-database-management-system
+
+Para este laboratorio utilizamos 4 servidores virtuales:
+	-Controller Server
+	-DB Server 1
+	-DB Server 2
+	-Load Balancer Server
+Añada los "DB Server" que mas se adecuen a sus necesidades y simplemente aplique las receta en ellos.	
+	
+### Comenzar con una instalación nueva de SO en todos los nodos
+
+apt -y update
+apt -y upgrade
+
+###Para aplicar solo en controller-server
+cd /tmp
+wget http://severalnines.com/downloads/cmon/install-cc.sh
+chmod +x install-cc.sh
+###Si tiene solo una interfaz de red
+###./install-cc.sh
+###
+### Si se tiene mas de una interfaz de red 
+### HOST=10.0.0.7 ./install-cc.sh
+###
+### Respuestas
+###		N
+###		N
+###		N
+###		<<password elegido para MySQL root>>
+###		Y
+###		Y
+###		Y
+###		Y		
+###		<<password elegido para MySQL root>>
+###		<<password elegido para usuario "cmon">>
+###
+### Acceder a la consola de ClusterControl http://<<Ip de la WAN>>/clustercontrol/
+
+###Para aplicar en todos los servidores ETAPA 1:
+vi /etc/hosts
+	10.0.0.7  mysql-controller-server
+	10.0.0.8  mysql-db-server-1	
+	10.0.0.9  mysql-db-server-2	
+	10.0.0.10 mysql-lb-server
+ssh-keygen -t rsa
+	###Pulse Enter en todas las preguntas
+ssh-copy-id -i ~/.ssh/id_rsa mysql-controller-server
+ssh-copy-id -i ~/.ssh/id_rsa mysql-db-server-1
+ssh-copy-id -i ~/.ssh/id_rsa mysql-db-server-2
+ssh-copy-id -i ~/.ssh/id_rsa mysql-lb-server
+
+###Para aplicar en todos los servidores ETAPA 2:
+vi /etc/ssh/sshd_config
+	[...]
+	PermitRootLogin without-password
+	[...]
+	PasswordAuthentication no
+	[...]
+	UsePAM no
+systemctl restart ssh
