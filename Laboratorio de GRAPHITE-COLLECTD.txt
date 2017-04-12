@@ -205,7 +205,7 @@ systemctl start collectd
 
 
 CONFIGURAR SERVIDOR GRAPHITE PARA RECIBIR Y MANEJAR LA DATA
-############################################################
+===========================================================
 FUENTE: https://www.digitalocean.com/community/tutorials/how-to-configure-collectd-to-gather-system-metrics-for-graphite-on-ubuntu-14-04
 
 vi /etc/carbon/storage-schemas.conf
@@ -214,3 +214,9 @@ vi /etc/carbon/storage-schemas.conf
 	retentions = 10s:1d,1m:7d,10m:1y
 systemctl stop carbon-cache
 systemctl start carbon-cache
+
+
+ELIMINAR METRICAS NO USADAS 
+===========================
+cd /var/lib/graphite/whisper
+rm -rf <<directorio con el nombre de la metrica>>
