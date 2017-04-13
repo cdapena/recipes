@@ -1,0 +1,14 @@
+Instalación de OPENVPN_AS
+=========================
+### Visitar https://openvpn.net/index.php/access-server/download-openvpn-as-sw.html
+### Seleccionar la distribución del SO que mas le convenga, en mi caso Ubuntu 16
+cd /tmp
+wget http://swupdate.openvpn.org/as/openvpn-as-2.1.4b-Ubuntu16.amd_64.deb
+dpkg -i openvpn-as-2.1.4b-Ubuntu16.amd_64.deb
+passwd openvpn
+	### <<password elegido>>
+
+### Acceder desde un browser a
+### Admin  UI: https://192.168.1.122:943/admin  con el usuario "openvpn" y el password <<password elegido>>
+### Client UI: https://192.168.1.122:943/ con el usuario creado en el admin y en la clave establecerá la clave del usuario la primera vez que entre
+
