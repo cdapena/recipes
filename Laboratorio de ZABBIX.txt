@@ -8,7 +8,8 @@ FUENTES: https://www.zabbix.com/documentation/3.2/manual/installation/install_fr
 apt -y update
 apt -y upgrade
 
-### Instalación de MySQL Server
+Instalación de MySQL Server
+===========================
 wget https://dev.mysql.com/get/mysql-apt-config_0.8.4-1_all.deb
 dpkg -i mysql-apt-config_0.8.4-1_all.deb
 	<<ok>> <<ok>>
@@ -16,7 +17,31 @@ apt -y update
 apt -y install mysql-server
 	<<password root elegido>>
 
-### Instalación de Zabbix
+Configurar un servidor Postfix con salida por gmail.com
+=======================================================
+FUENTE: https://easyengine.io/tutorials/linux/ubuntu-postfix-gmail-smtp/
+
+apt -y install postfix mailutils libsasl2-2 ca-certificates libsasl2-modules
+	<<internet site>>
+	<<fqhn>>
+vi /etc/postfix/main.cf
+	### Comentar o Eliminar todas las líneas del archivo y dejar sólo
+	relayhost = [smtp.gmail.com]:587
+	smtp_sasl_auth_enable = yes
+	smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+	smtp_sasl_security_options = noanonymous
+	smtp_tls_CAfile = /etc/postfix/cacert.pem
+	smtp_use_tls = yes
+vi /etc/postfix/sasl_passwd
+	[smtp.gmail.com]:587    USERNAME@gmail.com:PASSWORD
+chmod 400 /etc/postfix/sasl_passwd
+postmap /etc/postfix/sasl_passwd
+cat /etc/ssl/certs/thawte_Primary_Root_CA.pem | tee -a /etc/postfix/cacert.pem
+systemctl restart postfix
+echo "Test mail from postfix" | mail -s "Test Postfix" carlosdapena@hotmail.com
+	
+Instalación de Zabbix
+=====================
 cd /tmp
 wget http://repo.zabbix.com/zabbix/3.2/ubuntu/pool/main/z/zabbix-release/zabbix-release_3.2-1+xenial_all.deb
 dpkg -i zabbix-release_3.2-1+xenial_all.deb

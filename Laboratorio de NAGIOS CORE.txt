@@ -81,13 +81,13 @@ make install
 systemctl restart nagios
 systemctl restart apache2
 
-
 =======================================================
 Configurar un servidor Postfix con salida por gmail.com
 =======================================================
 FUENTE: https://easyengine.io/tutorials/linux/ubuntu-postfix-gmail-smtp/
-apt install apt-get install postfix mailutils libsasl2-2 ca-certificates libsasl2-modules
+apt -y install postfix mailutils libsasl2-2 ca-certificates libsasl2-modules
 vi /etc/postfix/main.cf
+	### Comentar o Eliminar todas las líneas del archivo y dejar sólo
 	relayhost = [smtp.gmail.com]:587
 	smtp_sasl_auth_enable = yes
 	smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
