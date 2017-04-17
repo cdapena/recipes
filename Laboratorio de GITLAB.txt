@@ -40,6 +40,6 @@ gitlab-ctl pg-upgrade
 vi /etc/gitlab/gitlab.rb
 	external_url='<<IP WAN>>'
 
-### Desde un navegador Web acceder a: http://<<ip WAN>> y crear el nuevo password para el usuario "root"
+### Desde un navegador Web acceder a: http://<<ip WAN>> para crear el nuevo password para el usuario "root"
 
 
