@@ -37,6 +37,8 @@ curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script
 apt -y install gitlab-ce=9.0.5-ce.0
 gitlab-ctl reconfigure
 gitlab-ctl pg-upgrade
+vi /etc/gitlab/gitlab.rb
+	external_url='<<IP WAN>>'
 
 ### Desde un navegador Web acceder a: http://<<ip WAN>> y crear el nuevo password para el usuario "root"
 
