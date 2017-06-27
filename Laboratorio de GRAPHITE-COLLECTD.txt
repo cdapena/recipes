@@ -3,7 +3,7 @@ INSTALACIÓN DE GRAPHITE
 FUENTE: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-graphite-on-an-ubuntu-14-04-server
 
 Muy importante: Comenzar desde una instalación del SO nueva 
-
+ 
 apt -y update
 apt -y upgrade
 apt -y install pwgen
